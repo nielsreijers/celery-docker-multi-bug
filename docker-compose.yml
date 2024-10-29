@@ -1,0 +1,46 @@
+services:
+  redis:
+    image: redis:latest
+    container_name: ${COMPOSE_PROJECT_NAME}-redis
+    ports:
+        - 6379:6379
+
+  worker:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    container_name: ${COMPOSE_PROJECT_NAME}-python-worker
+    image: ${COMPOSE_PROJECT_NAME}-python
+    depends_on:
+      - redis
+    volumes:
+      - .:/app
+    working_dir: /app
+    command: celery -A tasks worker
+
+  multi:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    container_name: ${COMPOSE_PROJECT_NAME}-python-multi
+    image: ${COMPOSE_PROJECT_NAME}-python
+    depends_on:
+      - redis
+    volumes:
+      - .:/app
+    working_dir: /app
+    command: bash -c 'celery -A tasks multi start worker_a; echo Done.; sleep infinity'
+
+  client:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    container_name: ${COMPOSE_PROJECT_NAME}-python-client
+    image: ${COMPOSE_PROJECT_NAME}-python
+    depends_on:
+      - redis
+    volumes:
+      - .:/app
+    working_dir: /app
+    command: python client.py
+
