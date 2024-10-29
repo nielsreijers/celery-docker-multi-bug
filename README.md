@@ -26,3 +26,5 @@ The output says it's starting nodes, and a `ps | grep celery` shows it's running
 ```
 
 But it seems to be stuck in a loop, taking 100% cpu on one core, and it doesn't respond. Doing another `docker compose run client` in the second terminal now gives an error: `celery.exceptions.TimeoutError: The operation timed out.`
+
+The problem is in forking the `--detach` worker, because when I start it with `C_FAKEFORK=1` it works (see `docker compose up multi-fakefork`).

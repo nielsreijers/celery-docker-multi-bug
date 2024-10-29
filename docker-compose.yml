@@ -31,6 +31,19 @@ services:
     working_dir: /app
     command: bash -c 'celery -A tasks multi start worker_a; echo Done.; sleep infinity'
 
+  multi-fakefork:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    container_name: ${COMPOSE_PROJECT_NAME}-python-multi-fakefork
+    image: ${COMPOSE_PROJECT_NAME}-python
+    depends_on:
+      - redis
+    volumes:
+      - .:/app
+    working_dir: /app
+    command: bash -c 'C_FAKEFORK=1 celery -A tasks multi start worker_a; echo Done.; sleep infinity'
+
   client:
     build:
       context: .
